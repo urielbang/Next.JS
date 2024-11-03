@@ -1,30 +1,7 @@
 import MeetupList from "../components/meetups/MeetupList";
-const DUMMY_MEETUPS = [
-  {
-    id: "m1",
-    title: "A First Meetup",
-    image:
-      "https://lh5.googleusercontent.com/p/AF1QipM3JWusd4E3ws8vdn8-cEwmw5ryOHdhXZsGTWAK=w1080-h624-n-k-no",
-    address: "Some Address 5, 23455 some city",
-  },
-  {
-    id: "m2",
-    title: "A First Meetup",
-    image:
-      "https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcR6tRdjjen2IemfxQ8N2vFibMcVeUvwYHpNTdbL6jmgjGsekYaEzWdaBqMNPT7CirScdpeGTcBT3Zk5IHc9vhY2NPvMjNe6HFx_INo_pg",
-    address: "Some Address 5, 23455 some city",
-  },
-  {
-    id: "m3",
-    title: "A First Meetup",
-    image:
-      "https://lh5.googleusercontent.com/p/AF1QipM3JWusd4E3ws8vdn8-cEwmw5ryOHdhXZsGTWAK=w1080-h624-n-k-no",
-    address: "Some Address 5, 23455 some city",
-  },
-];
 
 export default function HomePage(props) {
-  return <MeetupList meetups={props.meetups} />;
+  return <MeetupList meetups={props?.meetups} />;
 }
 
 // export async function getServerSideProps(context) {
@@ -39,9 +16,29 @@ export default function HomePage(props) {
 // }
 
 export async function getStaticProps() {
+  const { MongoClient } = await import("mongodb"); // Import only on server side
+
+  const client = await MongoClient.connect(
+    "mongodb+srv://uriel:uriel19988@meets.fzc3b.mongodb.net/?retryWrites=true&w=majority&appName=meets"
+  );
+
+  const db = client.db();
+
+  const meetupsCollection = db.collection("meetups");
+
+  // Await the array of meetups
+  const allMeets = await meetupsCollection.find().toArray();
+
+  client.close();
+
   return {
     props: {
-      meetups: DUMMY_MEETUPS,
+      meetups: allMeets.map((meetup) => ({
+        title: meetup.title,
+        address: meetup.address,
+        image: meetup.image,
+        id: meetup._id.toString(),
+      })),
     },
     revalidate: 10,
   };

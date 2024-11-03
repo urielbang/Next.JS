@@ -12,23 +12,53 @@ export default function MeetUpDetails(props) {
 }
 
 export async function getStaticPaths() {
+  const { MongoClient } = await import("mongodb"); // Import only on server side
+
+  const client = await MongoClient.connect(
+    "mongodb+srv://uriel:uriel19988@meets.fzc3b.mongodb.net/?retryWrites=true&w=majority&appName=meets"
+  );
+
+  const db = client.db();
+  const meetupsCollection = db.collection("meetups");
+
+  const allMeets = await meetupsCollection
+    .find({}, { projection: { _id: 1 } })
+    .toArray();
+
+  client.close();
+
   return {
     fallback: false,
-    paths: [{ params: { meetupId: "m1" } }, { params: { meetupId: "m2" } }],
+    paths: allMeets.map((meetup) => ({
+      params: { meetupId: meetup._id.toString() },
+    })),
   };
 }
-
 export async function getStaticProps(context) {
-  const params = context.params.meetupId;
+  const meetupId = context.params.meetupId;
+
+  const { MongoClient, ObjectId } = await import("mongodb"); // Import only on server side
+
+  const client = await MongoClient.connect(
+    "mongodb+srv://uriel:uriel19988@meets.fzc3b.mongodb.net/?retryWrites=true&w=majority&appName=meets"
+  );
+
+  const db = client.db();
+  const meetupsCollection = db.collection("meetups");
+
+  const meetup = await meetupsCollection.findOne({
+    _id: new ObjectId(meetupId),
+  });
+
+  client.close();
+
   return {
     props: {
       meetupData: {
-        image:
-          "https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcR6tRdjjen2IemfxQ8N2vFibMcVeUvwYHpNTdbL6jmgjGsekYaEzWdaBqMNPT7CirScdpeGTcBT3Zk5IHc9vhY2NPvMjNe6HFx_INo_pg",
-        title: "A first Meet up",
-        id: params,
-        address: "Some street 5, Some city",
-        description: "A first Meet up",
+        id: meetup._id.toString(),
+        title: meetup.title,
+        image: meetup.image,
+        description: meetup.description,
       },
     },
   };
