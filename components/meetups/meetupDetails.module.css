@@ -1,0 +1,8 @@
+.detail img {
+  width: 100%;
+  border: dotted 2px rgb(59, 31, 31);
+  padding: 1rem;
+}
+.detail {
+  text-align: center;
+}
