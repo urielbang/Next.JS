@@ -1,13 +1,23 @@
+import Head from "next/head";
 import MeetUpDetail from "../../components/meetups/MeetUpDedatls";
 
 export default function MeetUpDetails(props) {
   return (
-    <MeetUpDetail
-      image={props.meetupData.image}
-      description={props.meetupData.description}
-      address={props.meetupData.address}
-      title={props.meetupData.title}
-    />
+    <>
+      <Head>
+        <title>{props.meetupData.title}</title>
+        <meta
+          name="description"
+          content="Browse a huge list of highly active react meetings!"
+        ></meta>
+      </Head>
+      <MeetUpDetail
+        image={props.meetupData.image}
+        description={props.meetupData.description}
+        address={props.meetupData.address}
+        title={props.meetupData.title}
+      />
+    </>
   );
 }
 
